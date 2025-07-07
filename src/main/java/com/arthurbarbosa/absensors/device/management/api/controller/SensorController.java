@@ -6,9 +6,11 @@ import com.arthurbarbosa.absensors.device.management.common.IdGenerator;
 import com.arthurbarbosa.absensors.device.management.domain.model.Sensor;
 import com.arthurbarbosa.absensors.device.management.domain.model.SensorId;
 import com.arthurbarbosa.absensors.device.management.domain.repository.SensorRepository;
+import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +35,13 @@ public class SensorController {
         entity = sensorRepository.saveAndFlush(entity);
 
         return convertToModel(entity);
+    }
+
+    @GetMapping("{sensorId}")
+    public SensorOutput getOne(@PathVariable TSID sensorId) {
+        Sensor sensor = sensorRepository.findById(new SensorId(sensorId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return convertToModel(sensor);
     }
 
     private SensorOutput convertToModel(Sensor sensor) {
