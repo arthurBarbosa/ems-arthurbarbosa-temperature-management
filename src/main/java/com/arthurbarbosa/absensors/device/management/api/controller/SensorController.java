@@ -1,6 +1,7 @@
 package com.arthurbarbosa.absensors.device.management.api.controller;
 
 import com.arthurbarbosa.absensors.device.management.api.model.SensorInput;
+import com.arthurbarbosa.absensors.device.management.api.model.SensorOutput;
 import com.arthurbarbosa.absensors.device.management.common.IdGenerator;
 import com.arthurbarbosa.absensors.device.management.domain.model.Sensor;
 import com.arthurbarbosa.absensors.device.management.domain.model.SensorId;
@@ -18,8 +19,8 @@ public class SensorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Sensor create(@RequestBody SensorInput input) {
-        var sensor = Sensor.builder()
+    public SensorOutput create(@RequestBody SensorInput input) {
+        var entity = Sensor.builder()
                 .id(new SensorId(IdGenerator.generateTSID()))
                 .name(input.getName())
                 .ip(input.getIp())
@@ -29,6 +30,22 @@ public class SensorController {
                 .enabled(false)
                 .build();
 
-        return sensorRepository.saveAndFlush(sensor);
+        entity = sensorRepository.saveAndFlush(entity);
+
+        return convertToModel(entity);
     }
+
+    private SensorOutput convertToModel(Sensor sensor) {
+        return SensorOutput.builder()
+                .id(sensor.getId().getValue())
+                .name(sensor.getName())
+                .ip(sensor.getIp())
+                .location(sensor.getLocation())
+                .protocol(sensor.getProtocol())
+                .model(sensor.getModel())
+                .enabled(sensor.getEnabled())
+                .build();
+    }
+
+
 }
